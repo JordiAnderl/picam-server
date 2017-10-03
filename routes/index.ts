@@ -1,7 +1,7 @@
 
 import { Router, Request, Response } from 'express';
 
-
+const serverName = "Raspberry Pi 0 - Cam";
 let router = Router();
 
 
@@ -9,7 +9,7 @@ let router = Router();
 
 router.get('/', function (req: Request, res: Response, next) {
   // res.sendFile(path.join(__dirname, "../public", "indexpalo3.html"));
-  res.render('index', { title: 'Picam 0' });
+  res.render('index', { title: serverName });
 });
 
 router.get(`/:name`, (req: Request, res: Response) => {

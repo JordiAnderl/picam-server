@@ -8,28 +8,31 @@ socket.on('liveStream', function (data: string) {
   let srcAttr = document.createAttribute("src");
   srcAttr.value = data;
   img.attributes.setNamedItem(srcAttr);
-
-  //hideBttn();
 });
 
 
 function startStream() {
   socket.emit('start-stream');
-  hideBttn();
+  changeElements(true);
 }
 
 function stopStream() {
   socket.emit('disconnect');
-  showBttn();
+  changeElements(false);
+}
+function changeElements(start: boolean) {
+  let startBtn = <HTMLButtonElement>document.getElementById("start");
+  let stopBtn = <HTMLButtonElement>document.getElementById("stop");
+  let infoMsg = <HTMLParagraphElement>document.getElementById("infoMsg");
+
+  let startVisibility = start ? "hidden" : "";
+  let stopVisibilty = start ? "" : "hidden";
+
+  startBtn.style.visibility = startVisibility;
+  stopBtn.style.visibility = stopVisibilty;
+  infoMsg.style.visibility = startVisibility;
+
 }
 
-function hideBttn() {
-  let elem = <HTMLButtonElement>document.getElementById("start");
-  elem.style.visibility = "hidden";
-}
-
-function showBttn() {
-  let elem = <HTMLButtonElement>document.getElementById("start");
-  elem.style.visibility = "";
-}
-
+let timelapseBtn = <HTMLButtonElement>document.getElementById("timelapse");
+timelapseBtn.disabled = true;

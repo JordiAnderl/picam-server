@@ -1,13 +1,18 @@
 extends layout
 
-
-
 block content
   h1= title
-  a login
-  p Welcome to #{title}
-  img(src="", alt="", srcset="" id="stream")
+  
+  p 
+    | Welcome to #{title}. 
+    a(href="#wip") Login
+  
+  img#stream(src="images/gijon.jpg", alt="", srcset="")
   br
-  button(id ="start", class="btn-lg btn-outline-secondary", onclick="startStream()") Conectar a preview
-  button(id ="stop", class="btn-lg btn-outline-secondary", onclick="stopStream()") Desconectar 
-  button(id ="timelapse", class="btn-lg btn-outline-secondary", onclick="configureTimelapse()") Configurar timelapse 
+ 
+  p(id="infoMsg") Currently not connected to #{title}, hit connect to stop this agony.
+  br
+  
+  button#start(class="btn-lg btn-outline-secondary", onclick="startStream()") Connect to preview
+  button#stop(class="btn-lg btn-outline-secondary", onclick="stopStream()") Disconnect 
+  button#timelapse(class="btn-lg btn-outline-secondary", onclick="configureTimelapse()") Configure timelapse (WIP) 
