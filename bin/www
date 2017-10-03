@@ -34,19 +34,19 @@ server.on('listening', onListening);
  */
 
 function normalizePort(val) {
-  var port = parseInt(val, 10);
+	var port = parseInt(val, 10);
 
-  if (isNaN(port)) {
-    // named pipe
-    return val;
-  }
+	if (isNaN(port)) {
+		// named pipe
+		return val;
+	}
 
-  if (port >= 0) {
-    // port number
-    return port;
-  }
+	if (port >= 0) {
+		// port number
+		return port;
+	}
 
-  return false;
+	return false;
 }
 
 /**
@@ -54,27 +54,27 @@ function normalizePort(val) {
  */
 
 function onError(error) {
-  if (error.syscall !== 'listen') {
-    throw error;
-  }
+	if (error.syscall !== 'listen') {
+		throw error;
+	}
 
-  var bind = typeof port === 'string'
-    ? 'Pipe ' + port
-    : 'Port ' + port;
+	var bind = typeof port === 'string'
+		? 'Pipe ' + port
+		: 'Port ' + port;
 
-  // handle specific listen errors with friendly messages
-  switch (error.code) {
-    case 'EACCES':
-      console.error(bind + ' requires elevated privileges');
-      process.exit(1);
-      break;
-    case 'EADDRINUSE':
-      console.error(bind + ' is already in use');
-      process.exit(1);
-      break;
-    default:
-      throw error;
-  }
+	// handle specific listen errors with friendly messages
+	switch (error.code) {
+	case 'EACCES':
+		console.error(bind + ' requires elevated privileges');
+		process.exit(1);
+		break;
+	case 'EADDRINUSE':
+		console.error(bind + ' is already in use');
+		process.exit(1);
+		break;
+	default:
+		throw error;
+	}
 }
 
 /**
@@ -82,12 +82,12 @@ function onError(error) {
  */
 
 function onListening() {
-  var addr = server.address();
-  var bind = typeof addr === 'string'
-    ? 'pipe ' + addr
-    : 'port ' + addr.port;
-  debug('Listening on ' + bind);
-  debug('Ready to rumble!');
+	var addr = server.address();
+	var bind = typeof addr === 'string'
+		? 'pipe ' + addr
+		: 'port ' + addr.port;
+	debug('Listening on ' + bind);
+	debug('Ready to rumble!');
 }
 
 // Lanzamos socket.io
@@ -95,8 +95,8 @@ function onListening() {
 
 // TODO: Mudar esto a su propio fichero.
 
-const imgLocation = "D:/dummy_img/dummy.png";
-const disconnectedLocation = "D:/dummy_img/disconnected.png";
+const imgLocation = 'D:/dummy_img/dummy.png';
+const disconnectedLocation = 'D:/dummy_img/disconnected.png';
 var socket = require('socket.io')(server);
 var fs = require('fs');
 // import * as Socket from 'socket.io';
@@ -106,85 +106,85 @@ let clients = new Map();//<string, SocketIO.Socket>();
 let connectedClients = new Map();
 
 let watching = false;
-socket.on("connection", (sock/*: SocketIO.Socket*/) => {
+socket.on('connection', (sock/*: SocketIO.Socket*/) => {
 
-  clients.set(sock.id, sock);
+	clients.set(sock.id, sock);
  
-  var address = sock.handshake.address;
-  console.log('New connection from ' + address);
+	var address = sock.handshake.address;
+	console.log('New connection from ' + address);
 
-  fs.readFile(disconnectedLocation, undefined, (err/*: NodeJS.ErrnoException*/, data/*: Buffer*/) => {
-    if (err) {
-      console.error(err);
-    } else {
-      sock.emit('liveStream', 'data:image/png;base64,' + data.toString("base64"));
-    }
+	fs.readFile(disconnectedLocation, undefined, (err/*: NodeJS.ErrnoException*/, data/*: Buffer*/) => {
+		if (err) {
+			console.error(err);
+		} else {
+			sock.emit('liveStream', 'data:image/png;base64,' + data.toString('base64'));
+		}
 
-  });
+	});
 
-  sock.on("disconnect", () => {
-    clients.delete(sock.id);
-    connectedClients.delete(sock.id);
-    if (clients.size === 0) {
-      // Nadie más conectado, matamos el stream.
+	sock.on('disconnect', () => {
+		clients.delete(sock.id);
+		connectedClients.delete(sock.id);
+		if (clients.size === 0) {
+			// Nadie más conectado, matamos el stream.
 
-      // Cambiar variable global de watchingfile a false
+			// Cambiar variable global de watchingfile a false
 
-      //if (proc) proc.kill();
-      fs.unwatchFile(imgLocation);
-    }
-  });
+			//if (proc) proc.kill();
+			fs.unwatchFile(imgLocation);
+		}
+	});
 
-  sock.on("start-stream", () => {
-    console.log('Plz stream...');
-    connectedClients.set(sock.id, sock);
-    // app.set('watchingFile', true);
+	sock.on('start-stream', () => {
+		console.log('Plz stream...');
+		connectedClients.set(sock.id, sock);
+		// app.set('watchingFile', true);
 
-    //<img src="”data:image/png;base64,{{imgData}}/">
-    fs.readFile(imgLocation, undefined, (err/*: NodeJS.ErrnoException*/, data/*: Buffer*/) => {
-      sock.emit('liveStream', 'data:image/png;base64,' + data.toString("base64"));
-    });
+		//<img src="”data:image/png;base64,{{imgData}}/">
+		fs.readFile(imgLocation, undefined, (err/*: NodeJS.ErrnoException*/, data/*: Buffer*/) => {
+			sock.emit('liveStream', 'data:image/png;base64,' + data.toString('base64'));
+		});
 
     
-    if(!watching){
-      console.log('Watching for changes...');
-      watching = true;
-      fs.watch(imgLocation, function (event, name) {
-        if (event === "change") {
-          fs.readFile(imgLocation, undefined, (err/*: NodeJS.ErrnoException*/, data/*: Buffer*/) => {
-            connectedClients.forEach((client)=>{
-              client.emit('liveStream', 'data:image/png;base64,' + data.toString("base64"));
-            });
-          });
-        }
+		if(!watching){
+			console.log('Watching for changes...');
+			watching = true;
+			fs.watch(imgLocation, function (event, name) {
+				if (event === 'change') {
+					fs.readFile(imgLocation, undefined, (err/*: NodeJS.ErrnoException*/, data/*: Buffer*/) => {
+						connectedClients.forEach((client)=>{
+							client.emit('liveStream', 'data:image/png;base64,' + data.toString('base64'));
+						});
+					});
+				}
   
-      });
-    }
+			});
+		}
     
-  });
+	});
 
 });
 
 function stopStream() {
-  if (clients.size === 0) {
-    // app.set('watchingFile', false);
-    // if (proc) proc.kill();
-    fs.unwatchFile(imgLocation);
-  }
+	if (clients.size === 0) {
+		// app.set('watchingFile', false);
+		// if (proc) proc.kill();
+		fs.unwatchFile(imgLocation);
+	}
 }
 
 function startStream(io/*: SocketIO.Server*/) {
 
-  //if (app.get('watchingFile')) {
-  fs.readFile(imgLocation, undefined, (err/*: NodeJS.ErrnoException*/, data/*: Buffer*/) => {
-    socket.sockets.emit('liveStream', 'data:image/png;base64,' + data.toString("base64"));
-  });
+	//if (app.get('watchingFile')) {
+	fs.readFile(imgLocation, undefined, (err/*: NodeJS.ErrnoException*/, data/*: Buffer*/) => {
+		socket.sockets.emit('liveStream', 'data:image/png;base64,' + data.toString('base64'));
+	});
 
-  //    return;
-  //  }
+	//    return;
+	//  }
 
-  // var args = ["-w", "640", "-h", "480", "-o", "./stream/image_stream.jpg", "-t", "999999999", "-tl", "100"];
-  // proc = spawn('raspistill', args);
+	// var args = ["-w", "640", "-h", "480", "-o", "./stream/image_stream.jpg", "-t", "999999999", "-tl", "100"];
+	// proc = spawn('raspistill', args);
 
 }
 
