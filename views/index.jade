@@ -1,10 +1,13 @@
 extends layout
 
-script(src='/node_modules/socket.io/lib/client.js')
-script(src='/public/javascripts/stream.js')
+
 
 block content
   h1= title
+  a login
   p Welcome to #{title}
   img(src="", alt="", srcset="" id="stream")
-  button(class ="start", (click)=startStream())
+  br
+  button(id ="start", class="btn-lg btn-outline-secondary", onclick="startStream()") Conectar a preview
+  button(id ="stop", class="btn-lg btn-outline-secondary", onclick="stopStream()") Desconectar 
+  button(id ="timelapse", class="btn-lg btn-outline-secondary", onclick="configureTimelapse()") Configurar timelapse 
