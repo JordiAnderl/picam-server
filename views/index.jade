@@ -1,0 +1,10 @@
+extends layout
+
+script(src='/node_modules/socket.io/lib/client.js')
+script(src='/public/javascripts/stream.js')
+
+block content
+  h1= title
+  p Welcome to #{title}
+  img(src="", alt="", srcset="" id="stream")
+  button(class ="start", (click)=startStream())

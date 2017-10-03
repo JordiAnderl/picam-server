@@ -1,0 +1,24 @@
+﻿{
+  "compileOnSave": true,
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es6",
+    "sourceMap": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowUnreachableCode": false,
+    "noImplicitReturns": true,
+    "removeComments": false,
+    "noImplicitAny": true, // Cambiar esto al principio, volver a poner cuando se avanza.
+    "noEmitOnError": false, // Cambiar estas a medida que se avanza
+    // "pretty": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitThis": true, // Cambiar estas a medida que se avanza
+    "noUnusedLocals": true,
+    "watch": true,
+    "typeRoots": [
+      "node_modules/@types"
+    ]
+  },
+  "exclude": [ "node_modules" ]
+}
