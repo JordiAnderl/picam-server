@@ -1,3 +1,4 @@
+Move socket code to its own file
 timelapse module
 login 
 admin view
