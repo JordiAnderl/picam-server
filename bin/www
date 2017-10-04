@@ -136,6 +136,7 @@ let disconnectFromStream = (sock) => {
 		// If nobody watches then we kill the process and stop watching the file.
 		console.log('No more clients, killing proccess...');
 		if (raspistill) raspistill.kill();
+		raspistill = undefined;		
 		watching = false;
 		clearInterval(setIntervalID);
 		console.log('He dead.');
@@ -172,6 +173,7 @@ socket.on('connection', (sock/*: SocketIO.Socket*/) => {
 		// app.set('watchingFile', true);
 
 		if (!raspistill) {
+			console.log('No raspistill found, spawning one.');
 			let args = ['-w', '640', '-h', '480', '-q', '80', '-o', './stream/image_stream.jpg', '-t', '999999999', '-tl', milisecondsInterval.toString()];
 
 			raspistill = spawn('raspistill', args);
