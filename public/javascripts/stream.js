@@ -5,6 +5,10 @@ socket.on('liveStream', function (data) {
     srcAttr.value = data;
     img.attributes.setNamedItem(srcAttr);
 });
+socket.on('connected', function (data) {
+    let infoMsg = document.getElementById("infoMsg");
+    infoMsg.textContent += ' Good news everyone! The socket is online.';
+});
 function startStream() {
     socket.emit('start-stream');
     changeElements(true);
@@ -23,6 +27,8 @@ function changeElements(start) {
     stopBtn.style.visibility = stopVisibilty;
     infoMsg.style.visibility = startVisibility;
 }
-let timelapseBtn = document.getElementById("timelapse");
-timelapseBtn.disabled = true;
+window.onload = (event) => {
+    let timelapseBtn = document.getElementById("timelapse");
+    timelapseBtn.disabled = true;
+};
 //# sourceMappingURL=stream.js.map

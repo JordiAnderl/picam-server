@@ -14,7 +14,6 @@
     "@types/express": "^4.0.37",
     "@types/morgan": "^1.7.33",
     "@types/path-parse": "^1.0.19",
-    "@types/path-to-regexp": "^1.7.0",
     "@types/serve-favicon": "^2.2.29",
     "@types/socket.io": "^1.4.30",
     "body-parser": "~1.17.1",

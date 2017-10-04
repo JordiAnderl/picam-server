@@ -115,14 +115,7 @@ socket.on('connection', (sock/*: SocketIO.Socket*/) => {
 	var address = sock.handshake.address;
 	console.log('New connection from ' + address);
 
-	fs.readFile(disconnectedLocation, undefined, (err/*: NodeJS.ErrnoException*/, data/*: Buffer*/) => {
-		if (err) {
-			console.error(err);
-		} else {
-			sock.emit('liveStream', 'data:image/png;base64,' + data.toString('base64'));
-		}
-
-	});
+	sock.emit('connected');
 
 	sock.on('disconnect', () => {
 		clients.delete(sock.id);

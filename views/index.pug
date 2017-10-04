@@ -10,9 +10,9 @@ block content
   img#stream(src="images/gijon.jpg", alt="", srcset="")
   br
  
-  p(id="infoMsg") Currently not connected to #{title}, hit connect to stop this agony.
+  p(id="infoMsg") Currently not streaming from #{title}, hit connect to stop this agony.
   br
   
   button#start(class="btn-lg btn-outline-secondary", onclick="startStream()") Connect to preview
   button#stop(class="btn-lg btn-outline-secondary", onclick="stopStream()") Disconnect 
-  button#timelapse(class="btn-lg btn-outline-secondary", onclick="configureTimelapse()") Configure timelapse (WIP) 
+  button#timelapse(class="btn-lg btn-outline-secondary disabled", onclick="configureTimelapse()") Configure timelapse (WIP) 
