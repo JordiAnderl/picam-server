@@ -161,6 +161,7 @@ socket.on('connection', (sock/*: SocketIO.Socket*/) => {
 			watching = true;
 			fs.watch(imgLocation, function (event) {
 				if (event === 'change') {
+					console.log('Yay, image is changing!');
 					// Notify all clients of change.
 					fs.readFile(imgLocation, undefined, (err/*: NodeJS.ErrnoException*/, data/*: Buffer*/) => {
 						lastImg = 'data:image/jpg;base64,'+ data.toString('base64');
