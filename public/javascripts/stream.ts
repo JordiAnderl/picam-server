@@ -15,11 +15,6 @@ socket.on('connected', function (data: string) {
   infoMsg.textContent += ' Good news everyone! The socket is online.'
 });
 
-socket.on('connected', function (data: string) {
-  let infoMsg = <HTMLParagraphElement>document.getElementById("infoMsg");
-  infoMsg.textContent += ' Good news everyone! The socket is online.'
-});
-
 
 function startStream() {
   socket.emit('start-stream');
@@ -27,7 +22,7 @@ function startStream() {
 }
 
 function stopStream() {
-  socket.emit('disconnect');
+  socket.emit('disconnect-client');
   changeElements(false);
 }
 function changeElements(start: boolean) {
