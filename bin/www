@@ -103,7 +103,7 @@ var fs = require('fs');
 // import * as Socket from 'socket.io';
 // import * as fs from 'fs';
 
-const milisecondsInterval = 50;
+const milisecondsInterval = 75;
 let clients = new Map();//<string, SocketIO.Socket>();
 let connectedClients = new Map();
 
@@ -142,7 +142,7 @@ socket.on('connection', (sock/*: SocketIO.Socket*/) => {
 		// app.set('watchingFile', true);
 
 		if (!raspistill) {
-			let args = ['-w', '640', '-h', '480', '-o', './stream/image_stream.jpg', '-t', '999999999', '-tl', milisecondsInterval.toString()];
+			let args = ['-w', '640', '-h', '480', '-q', '80', '-o', './stream/image_stream.jpg', '-t', '999999999', '-tl', milisecondsInterval.toString()];
 
 			raspistill = spawn('raspistill', args);
 			raspistill.on('error', (err) => {
