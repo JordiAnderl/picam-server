@@ -113,7 +113,7 @@ let raspistill; // the child process we will launch to generate images
 let lastImg;
 
 fs.readFile(imgLocation, undefined, (err/*: NodeJS.ErrnoException*/, data/*: Buffer*/) => {
-	lastImg =  'data:image/jpg;base64,'+ data.toString('base64');
+	lastImg = 'data:image/jpg;base64,' + data.toString('base64');
 });
 
 socket.on('connection', (sock/*: SocketIO.Socket*/) => {
@@ -160,16 +160,16 @@ socket.on('connection', (sock/*: SocketIO.Socket*/) => {
 			console.log('Watching for changes...');
 			watching = true;
 			fs.watch(imgLocation, function (event) {
-				if (event === 'change') {
-					console.log('Yay, image is changing!');
-					// Notify all clients of change.
-					fs.readFile(imgLocation, undefined, (err/*: NodeJS.ErrnoException*/, data/*: Buffer*/) => {
-						lastImg = 'data:image/jpg;base64,'+ data.toString('base64');
-						connectedClients.forEach((client) => {
-							client.emit('liveStream', lastImg);
-						});
+				//if (event === 'change') {
+				console.log('Yay, image is changing! Event: '+ event);
+				// Notify all clients of change.
+				fs.readFile(imgLocation, undefined, (err/*: NodeJS.ErrnoException*/, data/*: Buffer*/) => {
+					lastImg = 'data:image/jpg;base64,' + data.toString('base64');
+					connectedClients.forEach((client) => {
+						client.emit('liveStream', lastImg);
 					});
-				}
+				});
+				//}
 
 			});
 		}
