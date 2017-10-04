@@ -116,6 +116,29 @@ fs.readFile(imgLocation, undefined, (err/*: NodeJS.ErrnoException*/, data/*: Buf
 	lastImg = 'data:image/jpg;base64,' + data.toString('base64');
 });
 
+let watchfileCallback = (event) => {
+	//if (event === 'change') {
+	console.log('Yay, image is changing! Event: '+ event);
+	// Notify all clients of change.
+	fs.readFile(imgLocation, undefined, (err/*: NodeJS.ErrnoException*/, data/*: Buffer*/) => {
+		lastImg = 'data:image/jpg;base64,' + data.toString('base64');
+		connectedClients.forEach((client) => {
+			client.emit('liveStream', lastImg);
+		});
+
+
+		// Linux hack: Because raspistill deletes and recreates the image a new inode is created. Thus losing the connection and getting no more events after the 
+		// first change. 
+		fs.unwatchFile(imgLocation);
+		fs.watch(imgLocation, watchfileCallback); 
+	});
+
+	
+	//}
+
+};
+
+
 socket.on('connection', (sock/*: SocketIO.Socket*/) => {
 
 	clients.set(sock.id, sock);
@@ -159,19 +182,7 @@ socket.on('connection', (sock/*: SocketIO.Socket*/) => {
 		if (!watching) {
 			console.log('Watching for changes...');
 			watching = true;
-			fs.watch(imgLocation, function (event) {
-				//if (event === 'change') {
-				console.log('Yay, image is changing! Event: '+ event);
-				// Notify all clients of change.
-				fs.readFile(imgLocation, undefined, (err/*: NodeJS.ErrnoException*/, data/*: Buffer*/) => {
-					lastImg = 'data:image/jpg;base64,' + data.toString('base64');
-					connectedClients.forEach((client) => {
-						client.emit('liveStream', lastImg);
-					});
-				});
-				//}
-
-			});
+			fs.watch(imgLocation, watchfileCallback);
 		}
 
 	});
