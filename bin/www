@@ -111,31 +111,22 @@ let watching = false; // controls if we are watching the image file
 let raspistill; // the child process we will launch to generate images
 
 let lastImg;
+let setIntervalID;
 
 fs.readFile(imgLocation, undefined, (err/*: NodeJS.ErrnoException*/, data/*: Buffer*/) => {
 	lastImg = 'data:image/jpg;base64,' + data.toString('base64');
 });
 
-let watchfileCallback = (event) => {
+let readImg = () => {
 	//if (event === 'change') {
-	console.log('Yay, image is changing! Event: '+ event);
+	console.log('Reading image '+ new Date().toDateString());
 	// Notify all clients of change.
 	fs.readFile(imgLocation, undefined, (err/*: NodeJS.ErrnoException*/, data/*: Buffer*/) => {
 		lastImg = 'data:image/jpg;base64,' + data.toString('base64');
 		connectedClients.forEach((client) => {
 			client.emit('liveStream', lastImg);
 		});
-
-
-		// Linux hack: Because raspistill deletes and recreates the image a new inode is created. Thus losing the connection and getting no more events after the 
-		// first change. 
-		fs.unwatchFile(imgLocation);
-		fs.watch(imgLocation, watchfileCallback); 
 	});
-
-	
-	//}
-
 };
 
 
@@ -155,7 +146,7 @@ socket.on('connection', (sock/*: SocketIO.Socket*/) => {
 			// If nobody watches then we kill the process and stop watching the file.
 			if (raspistill) raspistill.kill();
 			watching = false;
-			fs.unwatchFile(imgLocation);
+			clearInterval(setIntervalID);
 		}
 	});
 
@@ -180,9 +171,10 @@ socket.on('connection', (sock/*: SocketIO.Socket*/) => {
 
 
 		if (!watching) {
-			console.log('Watching for changes...');
+			console.log('Periodically check file for changes');
 			watching = true;
-			fs.watch(imgLocation, watchfileCallback);
+
+			setIntervalID = setInterval(readImg, milisecondsInterval);
 		}
 
 	});
