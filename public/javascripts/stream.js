@@ -9,16 +9,12 @@ socket.on('connected', function (data) {
     let infoMsg = document.getElementById("infoMsg");
     infoMsg.textContent += ' Good news everyone! The socket is online.';
 });
-socket.on('connected', function (data) {
-    let infoMsg = document.getElementById("infoMsg");
-    infoMsg.textContent += ' Good news everyone! The socket is online.';
-});
 function startStream() {
     socket.emit('start-stream');
     changeElements(true);
 }
 function stopStream() {
-    socket.emit('disconnect');
+    socket.emit('disconnect-client');
     changeElements(false);
 }
 function changeElements(start) {

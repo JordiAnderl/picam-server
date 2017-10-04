@@ -119,7 +119,7 @@ fs.readFile(imgLocation, undefined, (err/*: NodeJS.ErrnoException*/, data/*: Buf
 
 let readImg = () => {
 	//if (event === 'change') {
-	console.log('Reading image '+ new Date().toString());
+	console.log('Reading image ' + new Date().toString());
 	// Notify all clients of change.
 	fs.readFile(imgLocation, undefined, (err/*: NodeJS.ErrnoException*/, data/*: Buffer*/) => {
 		lastImg = 'data:image/jpg;base64,' + data.toString('base64');
@@ -129,6 +129,20 @@ let readImg = () => {
 	});
 };
 
+let disconnectFromStream = (sock) => {
+	connectedClients.delete(sock.id);
+
+	if (connectedClients.size === 0) {
+		// If nobody watches then we kill the process and stop watching the file.
+		console.log('No more clients, killing proccess...');
+		if (raspistill) raspistill.kill();
+		watching = false;
+		clearInterval(setIntervalID);
+		console.log('He dead.');
+	} else {
+		console.log('Remaining connected clients ' + connectedClients);
+	}
+};
 
 socket.on('connection', (sock/*: SocketIO.Socket*/) => {
 
@@ -140,20 +154,16 @@ socket.on('connection', (sock/*: SocketIO.Socket*/) => {
 	sock.emit('connected');
 
 	sock.on('disconnect', () => {
-		console.log('Disconnect from client '+ address);
+		console.log('Disconnect (socket) from client ' + address);
 		clients.delete(sock.id);
-		connectedClients.delete(sock.id);
-		
-		if (connectedClients.size === 0) {
-			// If nobody watches then we kill the process and stop watching the file.
-			console.log('No more clients, killing proccess...');
-			if (raspistill) raspistill.kill();
-			watching = false;
-			clearInterval(setIntervalID);
-			console.log('He dead.');
-		}else{
-			console.log('Remaining connected clients '+ connectedClients);
-		}
+		disconnectFromStream(sock);
+
+
+	});
+
+	sock.on('disconnect-client', () => {
+		console.log('Disconnect (button) from client ' + address);
+		disconnectFromStream(sock);
 	});
 
 	sock.on('start-stream', () => {
