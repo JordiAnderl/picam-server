@@ -10,6 +10,16 @@ socket.on('liveStream', function (data: string) {
   img.attributes.setNamedItem(srcAttr);
 });
 
+socket.on('connected', function (data: string) {
+  let infoMsg = <HTMLParagraphElement>document.getElementById("infoMsg");
+  infoMsg.textContent += ' Good news everyone! The socket is online.'
+});
+
+socket.on('connected', function (data: string) {
+  let infoMsg = <HTMLParagraphElement>document.getElementById("infoMsg");
+  infoMsg.textContent += ' Good news everyone! The socket is online.'
+});
+
 
 function startStream() {
   socket.emit('start-stream');
@@ -34,5 +44,7 @@ function changeElements(start: boolean) {
 
 }
 
-let timelapseBtn = <HTMLButtonElement>document.getElementById("timelapse");
-timelapseBtn.disabled = true;
+window.onload = (event: Event) => {
+  let timelapseBtn = <HTMLButtonElement>document.getElementById("timelapse");
+  timelapseBtn.disabled = true;
+}
