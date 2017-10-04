@@ -3,11 +3,14 @@
 Just another Node.js server in order to see and control your Raspberry Pi and it's camera module Edit
 raspberry-pi-camera
 
+## Video:
 
 Video of the first version in action:
+
 [![Proof os concept video](https://img.youtube.com/vi/1611GJCQz8k/0.jpg)](https://www.youtube.com/watch?v=1611GJCQz8k)
 
 ## Makes use of: 
+
 - Nodejs
 - socket.io
 - expressjs
@@ -22,8 +25,7 @@ Video of the first version in action:
 ```shell
 git clone https://github.com/JordiAnderl/picam-server.git
 ```
-You will need git for this step
-
+You will need git for this step.
 
 ### Change into the directory
 
@@ -37,7 +39,7 @@ cd picam-server
 npm install
 ```
 
-You will need nodejs for this
+You will need nodejs for this step.
 
 ### Run the server
 
