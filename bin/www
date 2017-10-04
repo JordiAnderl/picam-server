@@ -118,8 +118,7 @@ fs.readFile(imgLocation, undefined, (err/*: NodeJS.ErrnoException*/, data/*: Buf
 });
 
 let readImg = () => {
-	//if (event === 'change') {
-	console.log('Reading image ' + new Date().toString());
+	// console.log('Reading image ' + new Date().toString());
 	// Notify all clients of change.
 	fs.readFile(imgLocation, undefined, (err/*: NodeJS.ErrnoException*/, data/*: Buffer*/) => {
 		lastImg = 'data:image/jpg;base64,' + data.toString('base64');
@@ -187,16 +186,13 @@ socket.on('connection', (sock/*: SocketIO.Socket*/) => {
 		// Send connected client the current image
 		sock.emit('liveStream', lastImg);
 
-
 		if (!watching) {
 			console.log('Periodically check file for changes');
 			watching = true;
 
 			setIntervalID = setInterval(readImg, milisecondsInterval);
 		}
-
 	});
-
 });
 
 
