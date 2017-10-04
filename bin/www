@@ -108,6 +108,13 @@ let connectedClients = new Map();
 
 let watching = false; // controls if we are watching the image file
 let raspistill; // the child process we will launch to generate images
+
+let lastImg;
+
+fs.readFile(imgLocation, undefined, (err/*: NodeJS.ErrnoException*/, data/*: Buffer*/) => {
+	lastImg =  'data:image/jpg;base64,'+ data.toString('base64');
+});
+
 socket.on('connection', (sock/*: SocketIO.Socket*/) => {
 
 	clients.set(sock.id, sock);
@@ -145,9 +152,7 @@ socket.on('connection', (sock/*: SocketIO.Socket*/) => {
 		}
 
 		// Send connected client the current image
-		fs.readFile(imgLocation, undefined, (err/*: NodeJS.ErrnoException*/, data/*: Buffer*/) => {
-			sock.emit('liveStream', 'data:image/jpg;base64,' + data.toString('base64'));
-		});
+		sock.emit('liveStream', lastImg);
 
 
 		if (!watching) {
@@ -157,8 +162,9 @@ socket.on('connection', (sock/*: SocketIO.Socket*/) => {
 				if (event === 'change') {
 					// Notify all clients of change.
 					fs.readFile(imgLocation, undefined, (err/*: NodeJS.ErrnoException*/, data/*: Buffer*/) => {
+						lastImg = 'data:image/jpg;base64,'+ data.toString('base64');
 						connectedClients.forEach((client) => {
-							client.emit('liveStream', 'data:image/jpg;base64,' + data.toString('base64'));
+							client.emit('liveStream', lastImg);
 						});
 					});
 				}

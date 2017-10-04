@@ -9,6 +9,10 @@ socket.on('connected', function (data) {
     let infoMsg = document.getElementById("infoMsg");
     infoMsg.textContent += ' Good news everyone! The socket is online.';
 });
+socket.on('connected', function (data) {
+    let infoMsg = document.getElementById("infoMsg");
+    infoMsg.textContent += ' Good news everyone! The socket is online.';
+});
 function startStream() {
     socket.emit('start-stream');
     changeElements(true);
