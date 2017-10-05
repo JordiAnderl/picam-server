@@ -171,11 +171,42 @@ socket.on('connection', (sock/*: SocketIO.Socket*/) => {
 				console.warn("Something happened while trying to spawn the raspistill command. Maybe this'll help:");
 				console.warn(err);
 			});
+			let buffer;
 			raspistill.stdout.on('data', (data) => { 
-				lastImg = 'data:image/jpg;base64,' + data.toString('base64');
-				connectedClients.forEach((client) => {
-					client.emit('liveStream', lastImg);
-				});
+
+				// Directly converting the data causes us to send an incomplete image. We have to check for a full image. And then send it.
+
+				// SOI	0xFF, 0xD8 - Start
+				// EOI  0xFF, 0xD9 - End
+
+				let startIndex = data.indexOf(0xFFD8);
+				let endIndex = data.indexOf(0xFFD9);
+
+				// Start conditions
+				if(buffer === undefined && endIndex === -1 ){
+					buffer = data; // First part
+				}else if (endIndex > -1){
+					lastImg = 'data:image/jpg;base64,' + data.slice(0, endIndex+2).toString('base64');
+					connectedClients.forEach((client) => {
+						client.emit('liveStream', lastImg);
+					});
+					buffer = data.slice(data.lastIndexOf(0xFFD8));
+				}else{ // If we already have a buffer
+					if(endIndex > -1){
+						buffer += data.slice(0, endIndex);
+						lastImg = 'data:image/jpg;base64,' + buffer.toString('base64');
+						connectedClients.forEach((client) => {
+							client.emit('liveStream', lastImg);
+						});
+						buffer = data.slice(startIndex);
+					}else{
+						buffer += data;
+					}
+				}
+
+				
+				
+				
 
 			});
 			
