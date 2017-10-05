@@ -1,4 +1,4 @@
-# [0.0.2] - 05-10-2017
+## [0.0.2] - 05-10-2017
 ### Description
 
 Optimizations and improvements. Raspistill now outputs the image to stdout, nodejs reads from the pipe, processes the buffer to an image and sends it to the clients. This greatly reduces the cpu usage (20%-30%) and gets the fps up to 8-9.
