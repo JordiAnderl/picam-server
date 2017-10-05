@@ -64,16 +64,16 @@ function onError(error) {
 
 	// handle specific listen errors with friendly messages
 	switch (error.code) {
-		case 'EACCES':
-			console.error(bind + ' requires elevated privileges');
-			process.exit(1);
-			break;
-		case 'EADDRINUSE':
-			console.error(bind + ' is already in use');
-			process.exit(1);
-			break;
-		default:
-			throw error;
+	case 'EACCES':
+		console.error(bind + ' requires elevated privileges');
+		process.exit(1);
+		break;
+	case 'EADDRINUSE':
+		console.error(bind + ' is already in use');
+		process.exit(1);
+		break;
+	default:
+		throw error;
 	}
 }
 
@@ -111,6 +111,8 @@ let raspistill; // the child process we will launch to generate images
 let lastImg;
 let setIntervalID;
 
+let buffer;
+
 // Default value for the image
 fs.readFile(disconnectedImgLocation, undefined, (err/*: NodeJS.ErrnoException*/, data/*: Buffer*/) => {
 	lastImg = 'data:image/jpg;base64,' + data.toString('base64');
@@ -125,6 +127,7 @@ let disconnectFromStream = (sock) => {
 		if (raspistill) raspistill.kill();
 		raspistill = undefined;
 		clearInterval(setIntervalID);
+		buffer = undefined;
 		console.log('He dead.');
 	} else {
 		console.log('Remaining connected clients ' + connectedClients);
@@ -168,10 +171,9 @@ socket.on('connection', (sock/*: SocketIO.Socket*/) => {
 
 			raspistill = spawn('raspistill', args);
 			raspistill.on('error', (err) => {
-				console.warn("Something happened while trying to spawn the raspistill command. Maybe this'll help:");
+				console.warn('Something happened while trying to spawn the raspistill command. Maybe this\'ll help:');
 				console.warn(err);
 			});
-			let buffer;
 			raspistill.stdout.on('data', (data) => {
 
 				// Directly converting the data causes us to send an incomplete image. We have to check for a full image. And then send it.
@@ -189,10 +191,10 @@ socket.on('connection', (sock/*: SocketIO.Socket*/) => {
 				// Start conditions
 				if (buffer === undefined) {
 					if (onlyOneStart) {
-						console.log("First buffer of stream");
+						console.log('First buffer of stream');
 						buffer = data; // First part
 					} else {
-						console.log("Very uncommon case.");
+						console.log('Very uncommon case. startIndex: ' + startIndex + ' lastStartIndex: ' + lastStartIndex);
 						lastImg = 'data:image/jpg;base64,' + data.slice(0, lastStartIndex - 1).toString('base64');
 						connectedClients.forEach((client) => {
 							client.emit('liveStream', lastImg);
@@ -201,7 +203,7 @@ socket.on('connection', (sock/*: SocketIO.Socket*/) => {
 					}
 				} else { // If we already have a buffer
 					if (startIndex > -1) {
-						console.log("Append data and send.");
+						console.log('Append data and send. startIndex: ' + startIndex + ' lastStartIndex: ' + lastStartIndex);
 						buffer = Buffer.concat([buffer, data.slice(0, startIndex - 1)]);
 						lastImg = 'data:image/jpg;base64,' + buffer.toString('base64');
 						connectedClients.forEach((client) => {
@@ -209,15 +211,10 @@ socket.on('connection', (sock/*: SocketIO.Socket*/) => {
 						});
 						buffer = data.slice(startIndex);
 					} else {
-						ondole.log("Just append and waiting for more.");
+						ondole.log('Just append and waiting for more.');
 						buffer = Buffer.concat([buffer, data]);
 					}
 				}
-
-
-
-
-
 			});
 
 			raspistill.stdout.on('end', function (data) {
