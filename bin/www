@@ -118,24 +118,36 @@ let splitImage = (buffer, sendCallback) => {
 	if (lastBuffer) {
 		buffer = Buffer.concat([lastBuffer, buffer]);
 	}
-	let startIndex = buffer.indexOf(0xFFD8);
-	let endIndex = buffer.indexOf(0xFFD9);
-	let last;
+	// let startIndex = buffer.indexOf(0xFFD8);
+	// let endIndex = buffer.indexOf(0xFFD9);
+	let image;
 
 	console.log('Starting to get images from stdout.');
 	//TODO: this would be quicker if we would iterate the buffer byte by byte
-	while (endIndex > -1) {
-		console.log('Sending image from pos ' + startIndex + ' to ' + endIndex);
-		let img = buffer.slice(startIndex - 1, endIndex);
-		sendCallback(img);
-		last = img;
-		buffer = buffer.slice(endIndex+1);
-		startIndex = buffer.indexOf(0xFFD8);
-		endIndex = buffer.indexOf(0xFFD9);
+
+	let specialByte=false;
+	let lastStartPos;
+	for(let i = 0, l = buffer.length; i < l; i++) {
+		if(buffer[i]===0xFF){
+			specialByte = true;
+		}else if(specialByte){
+			if(buffer[i] === 0xD8){// Start
+				lastStartPos = i;
+			}else if (buffer[i] === 0xD8){ // End
+				let endPos = i;
+				console.log('Sending image from pos ' + lastStartPos-1 + ' to ' + endPos);
+				image = buffer.slice(lastStartPos-1, endPos);
+				sendCallback(image);
+			}else{
+				specialByte = false;
+			}
+		}else{
+			specialByte = false;
+		}
 	}
 	console.log('All images sent.');
-	lastBuffer = buffer;
-	return last;
+	lastBuffer = buffer.slice(lastStartPos-1);
+	return image;
 };
 
 // Default value for the image
