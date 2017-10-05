@@ -111,11 +111,13 @@ let raspistill; // the child process we will launch to generate images
 let lastImg;
 let setIntervalID;
 
-let betweenBuffer;
+let lastBuffer;
 let splitImage = (buffer, sendCallback) => {
 	// SOI	0xFF, 0xD8 - Start
 	// EOI  0xFF, 0xD9 - End
-
+	if(lastBuffer){
+		buffer = Buffer.concat([lastBuffer, buffer]);
+	}
 	let startIndex = buffer.indexOf(0xFFD8);
 	let endIndex = buffer.indexOf(0xFFD9);
 	let last;
@@ -128,7 +130,7 @@ let splitImage = (buffer, sendCallback) => {
 		startIndex = buffer.indexOf(0xFFD8);
 		endIndex = buffer.indexOf(0xFFD9);
 	}
-	betweenBuffer = buffer;
+	lastBuffer = buffer;
 	return last;
 };
 
