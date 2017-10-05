@@ -180,20 +180,22 @@ socket.on('connection', (sock/*: SocketIO.Socket*/) => {
 				// EOI  0xFF, 0xD9 - End
 
 				let startIndex = data.indexOf(0xFFD8);
-				let endIndex = data.indexOf(0xFFD9);
+				// seems that checking for an EndIndex is no use since it is always send, even on an incomplete stream.
+				//let endIndex = data.indexOf(0xFFD9);
 
 				// Start conditions
-				if(buffer === undefined && endIndex === -1 ){
+				if(buffer === undefined && startIndex === -1 ){
+					console.log("First buffer of stream");
 					buffer = data; // First part
-				}else if (endIndex > -1){
-					lastImg = 'data:image/jpg;base64,' + data.slice(0, endIndex+2).toString('base64');
+				}else if (startIndex > -1){
+					lastImg = 'data:image/jpg;base64,' + data.slice(0, startIndex).toString('base64');
 					connectedClients.forEach((client) => {
 						client.emit('liveStream', lastImg);
 					});
-					buffer = data.slice(data.lastIndexOf(0xFFD8));
+					buffer = data.slice(startIndex);
 				}else{ // If we already have a buffer
-					if(endIndex > -1){
-						buffer += data.slice(0, endIndex);
+					if(startIndex > -1){
+						buffer += data.slice(0, startIndex);
 						lastImg = 'data:image/jpg;base64,' + buffer.toString('base64');
 						connectedClients.forEach((client) => {
 							client.emit('liveStream', lastImg);
