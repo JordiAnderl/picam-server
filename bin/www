@@ -123,7 +123,7 @@ let disconnectFromStream = (sock) => {
 		// If nobody watches then we kill the process and stop watching the file.
 		console.log('No more clients, killing proccess...');
 		if (raspistill) raspistill.kill();
-		raspistill = undefined;	
+		raspistill = undefined;
 		clearInterval(setIntervalID);
 		console.log('He dead.');
 	} else {
@@ -158,7 +158,7 @@ socket.on('connection', (sock/*: SocketIO.Socket*/) => {
 		connectedClients.set(sock.id, sock);
 		// app.set('watchingFile', true);
 
-		
+
 		// Send connected client the current image
 		sock.emit('liveStream', lastImg);
 
@@ -172,7 +172,7 @@ socket.on('connection', (sock/*: SocketIO.Socket*/) => {
 				console.warn(err);
 			});
 			let buffer;
-			raspistill.stdout.on('data', (data) => { 
+			raspistill.stdout.on('data', (data) => {
 
 				// Directly converting the data causes us to send an incomplete image. We have to check for a full image. And then send it.
 
@@ -187,17 +187,20 @@ socket.on('connection', (sock/*: SocketIO.Socket*/) => {
 				let onlyOneStart = (startIndex === lastStartIndex);
 
 				// Start conditions
-				if(buffer === undefined && onlyOneStart){
-					console.log("First buffer of stream");
-					buffer = data; // First part
-				}else if (!onlyOneStart){
-					lastImg = 'data:image/jpg;base64,' + data.slice(0, lastStartIndex).toString('base64');
-					connectedClients.forEach((client) => {
-						client.emit('liveStream', lastImg);
-					});
-					buffer = data.slice(lastStartIndex);
-				}else{ // If we already have a buffer
-					if(startIndex > -1){
+				if (buffer === undefined) {
+					if (onlyOneStart) {
+						console.log("First buffer of stream");
+						buffer = data; // First part
+					} else {
+						console.log("Very uncommon case.");
+						lastImg = 'data:image/jpg;base64,' + data.slice(0, lastStartIndex).toString('base64');
+						connectedClients.forEach((client) => {
+							client.emit('liveStream', lastImg);
+						});
+						buffer = data.slice(lastStartIndex);
+					}
+				} else { // If we already have a buffer
+					if (startIndex > -1) {
 						condole.log("Append data and send.");
 						buffer += data.slice(0, startIndex);
 						lastImg = 'data:image/jpg;base64,' + buffer.toString('base64');
@@ -205,19 +208,19 @@ socket.on('connection', (sock/*: SocketIO.Socket*/) => {
 							client.emit('liveStream', lastImg);
 						});
 						buffer = data.slice(startIndex);
-					}else{
+					} else {
 						ondole.log("Just append and waiting for more.");
 						buffer += data;
 					}
 				}
 
-				
-				
-				
+
+
+
 
 			});
-			
-			raspistill.stdout.on('end', function(data) {
+
+			raspistill.stdout.on('end', function (data) {
 				console.log('Wow. Raspistill ended... we should it launch again.');
 				// TODO: spawn a new child
 			});
