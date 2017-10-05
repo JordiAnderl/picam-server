@@ -172,7 +172,7 @@ socket.on('connection', (sock/*: SocketIO.Socket*/) => {
 				console.warn(err);
 			});
 			raspistill.stdout.on('data', (data) => { 
-				lastImg = data.toString('base64');
+				lastImg = 'data:image/jpg;base64,' + data.toString('base64');
 				connectedClients.forEach((client) => {
 					client.emit('liveStream', lastImg);
 				});
