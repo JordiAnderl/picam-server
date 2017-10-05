@@ -193,16 +193,16 @@ socket.on('connection', (sock/*: SocketIO.Socket*/) => {
 						buffer = data; // First part
 					} else {
 						console.log("Very uncommon case.");
-						lastImg = 'data:image/jpg;base64,' + data.slice(0, lastStartIndex).toString('base64');
+						lastImg = 'data:image/jpg;base64,' + data.slice(0, lastStartIndex - 1).toString('base64');
 						connectedClients.forEach((client) => {
 							client.emit('liveStream', lastImg);
 						});
-						buffer = data.slice(lastStartIndex);
+						buffer = data.slice(lastStartIndex - 1);
 					}
 				} else { // If we already have a buffer
 					if (startIndex > -1) {
 						console.log("Append data and send.");
-						buffer = Buffer.concat([buffer, data.slice(0, startIndex)]);
+						buffer = Buffer.concat([buffer, data.slice(0, startIndex - 1)]);
 						lastImg = 'data:image/jpg;base64,' + buffer.toString('base64');
 						connectedClients.forEach((client) => {
 							client.emit('liveStream', lastImg);
