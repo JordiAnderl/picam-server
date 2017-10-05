@@ -95,8 +95,7 @@ function onListening() {
 
 // TODO: Move this to its own file
 
-const imgLocation = 'stream/image_stream.jpg';
-const disconnectedLocation = 'D:/dummy_img/disconnected.png';
+const disconnectedImgLocation = 'public/images/disconnected.jpg';
 var socket = require('socket.io')(server);
 const { spawn } = require('child_process');
 var fs = require('fs');
@@ -107,26 +106,15 @@ const milisecondsInterval = 75;
 let clients = new Map();//<string, SocketIO.Socket>();
 let connectedClients = new Map();
 
-let watching = false; // controls if we are watching the image file
 let raspistill; // the child process we will launch to generate images
 
 let lastImg;
 let setIntervalID;
 
-fs.readFile(imgLocation, undefined, (err/*: NodeJS.ErrnoException*/, data/*: Buffer*/) => {
+// Default value for the image
+fs.readFile(disconnectedImgLocation, undefined, (err/*: NodeJS.ErrnoException*/, data/*: Buffer*/) => {
 	lastImg = 'data:image/jpg;base64,' + data.toString('base64');
 });
-
-let readImg = () => {
-	// console.log('Reading image ' + new Date().toString());
-	// Notify all clients of change.
-	fs.readFile(imgLocation, undefined, (err/*: NodeJS.ErrnoException*/, data/*: Buffer*/) => {
-		lastImg = 'data:image/jpg;base64,' + data.toString('base64');
-		connectedClients.forEach((client) => {
-			client.emit('liveStream', lastImg);
-		});
-	});
-};
 
 let disconnectFromStream = (sock) => {
 	connectedClients.delete(sock.id);
@@ -135,8 +123,7 @@ let disconnectFromStream = (sock) => {
 		// If nobody watches then we kill the process and stop watching the file.
 		console.log('No more clients, killing proccess...');
 		if (raspistill) raspistill.kill();
-		raspistill = undefined;		
-		watching = false;
+		raspistill = undefined;	
 		clearInterval(setIntervalID);
 		console.log('He dead.');
 	} else {
@@ -171,26 +158,32 @@ socket.on('connection', (sock/*: SocketIO.Socket*/) => {
 		connectedClients.set(sock.id, sock);
 		// app.set('watchingFile', true);
 
+		
+		// Send connected client the current image
+		sock.emit('liveStream', lastImg);
+
 		if (!raspistill) {
 			console.log('No raspistill found, spawning one.');
-			let args = ['-w', '640', '-h', '480', '-q', '80', '-o', './stream/image_stream.jpg', '-t', '999999999', '-tl', milisecondsInterval.toString()];
+			let args = ['-w', '640', '-h', '480', '-o', '-', '-q', '80', '-t', '999999999', '-tl', milisecondsInterval.toString()];
 
 			raspistill = spawn('raspistill', args);
 			raspistill.on('error', (err) => {
 				console.warn("Something happened while trying to spawn the raspistill command. Maybe this'll help:");
 				console.warn(err);
 			});
+			raspistill.stdout.on('data', (data) => { 
+				lastImg = data.toString('base64');
+				connectedClients.forEach((client) => {
+					client.emit('liveStream', lastImg);
+				});
 
-		}
+			});
+			
+			raspistill.stdout.on('end', function(data) {
+				console.log('Wow. Raspistill ended... we should it launch again.');
+				// TODO: spawn a new child
+			});
 
-		// Send connected client the current image
-		sock.emit('liveStream', lastImg);
-
-		if (!watching) {
-			console.log('Periodically check file for changes');
-			watching = true;
-
-			setIntervalID = setInterval(readImg, milisecondsInterval);
 		}
 	});
 });
