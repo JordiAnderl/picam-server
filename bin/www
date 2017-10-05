@@ -64,16 +64,16 @@ function onError(error) {
 
 	// handle specific listen errors with friendly messages
 	switch (error.code) {
-	case 'EACCES':
-		console.error(bind + ' requires elevated privileges');
-		process.exit(1);
-		break;
-	case 'EADDRINUSE':
-		console.error(bind + ' is already in use');
-		process.exit(1);
-		break;
-	default:
-		throw error;
+		case 'EACCES':
+			console.error(bind + ' requires elevated privileges');
+			process.exit(1);
+			break;
+		case 'EADDRINUSE':
+			console.error(bind + ' is already in use');
+			process.exit(1);
+			break;
+		default:
+			throw error;
 	}
 }
 
@@ -111,7 +111,26 @@ let raspistill; // the child process we will launch to generate images
 let lastImg;
 let setIntervalID;
 
-let buffer;
+let betweenBuffer;
+let splitImage = (buffer, sendCallback) => {
+	// SOI	0xFF, 0xD8 - Start
+	// EOI  0xFF, 0xD9 - End
+
+	let startIndex = buffer.indexOf(0xFFD8);
+	let endIndex = buffer.indexOf(0xFFD9);
+	let last;
+
+	while (endIndex > -1) {
+		let img = buffer.slice(startIndex - 1, endIndex);
+		sendCallback(img);
+		last = img;
+		buffer = buffer.slice(endIndex);
+		startIndex = buffer.indexOf(0xFFD8);
+		endIndex = buffer.indexOf(0xFFD9);
+	}
+	betweenBuffer = buffer;
+	return last;
+};
 
 // Default value for the image
 fs.readFile(disconnectedImgLocation, undefined, (err/*: NodeJS.ErrnoException*/, data/*: Buffer*/) => {
@@ -178,43 +197,14 @@ socket.on('connection', (sock/*: SocketIO.Socket*/) => {
 
 				// Directly converting the data causes us to send an incomplete image. We have to check for a full image. And then send it.
 
-				// SOI	0xFF, 0xD8 - Start
-				// EOI  0xFF, 0xD9 - End
+				// Since there is more than one image per stdout we delegate the process to a function
+				let lImg = splitImage(data, (img) => {
+					connectedClients.forEach((client) => {
+						client.emit('liveStream', 'data:image/jpg;base64,' + img.toString('base64'));
+					});
+				});
+				lastImg = 'data:image/jpg;base64,' + lImg.toString('base64');
 
-				let startIndex = data.indexOf(0xFFD8);
-				let lastStartIndex = data.lastIndexOf(0xFFD8);
-				// seems that checking for an EndIndex is no use since it is always send, even on an incomplete stream.
-				//let endIndex = data.indexOf(0xFFD9);
-
-				let onlyOneStart = (startIndex === lastStartIndex);
-
-				// Start conditions
-				if (buffer === undefined) {
-					if (onlyOneStart) {
-						console.log('First buffer of stream');
-						buffer = data; // First part
-					} else {
-						console.log('Very uncommon case. startIndex: ' + startIndex + ' lastStartIndex: ' + lastStartIndex);
-						lastImg = 'data:image/jpg;base64,' + data.slice(0, lastStartIndex - 1).toString('base64');
-						connectedClients.forEach((client) => {
-							client.emit('liveStream', lastImg);
-						});
-						buffer = data.slice(lastStartIndex - 1);
-					}
-				} else { // If we already have a buffer
-					if (startIndex > -1) {
-						console.log('Append data and send. startIndex: ' + startIndex + ' lastStartIndex: ' + lastStartIndex);
-						buffer = Buffer.concat([buffer, data.slice(0, startIndex - 1)]);
-						lastImg = 'data:image/jpg;base64,' + buffer.toString('base64');
-						connectedClients.forEach((client) => {
-							client.emit('liveStream', lastImg);
-						});
-						buffer = data.slice(startIndex);
-					} else {
-						ondole.log('Just append and waiting for more.');
-						buffer = Buffer.concat([buffer, data]);
-					}
-				}
 			});
 
 			raspistill.stdout.on('end', function (data) {
