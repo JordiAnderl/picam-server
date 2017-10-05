@@ -115,14 +115,16 @@ let lastBuffer;
 let splitImage = (buffer, sendCallback) => {
 	// SOI	0xFF, 0xD8 - Start
 	// EOI  0xFF, 0xD9 - End
-	if(lastBuffer){
+	if (lastBuffer) {
 		buffer = Buffer.concat([lastBuffer, buffer]);
 	}
 	let startIndex = buffer.indexOf(0xFFD8);
 	let endIndex = buffer.indexOf(0xFFD9);
 	let last;
 
+	console.log('Starting to get images from stdout.');
 	while (endIndex > -1) {
+		console.log('Sending image from pos ' + startIndex + ' to ' + endIndex);
 		let img = buffer.slice(startIndex - 1, endIndex);
 		sendCallback(img);
 		last = img;
@@ -130,6 +132,7 @@ let splitImage = (buffer, sendCallback) => {
 		startIndex = buffer.indexOf(0xFFD8);
 		endIndex = buffer.indexOf(0xFFD9);
 	}
+	console.log('All images sent.');
 	lastBuffer = buffer;
 	return last;
 };
